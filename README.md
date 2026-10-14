@@ -57,6 +57,9 @@ cd admin && npm install && npm run dev
 
 ## Deployment
 
-All three apps deploy to [Render](https://render.com) from `render.yaml`: the API as a Node web service with a Render Postgres database, and the two frontends as static sites. See the comments in `render.yaml` for the order to fill in the URLs.
+Everything runs on [Render](https://render.com):
+
+- **Database and frontends** come from the Blueprint in `render.yaml`: a Render Postgres database and two static sites.
+- **API** is a standalone Render Web Service (root directory `api`). Its build command, start command and environment variables are listed in the comments at the top of `render.yaml`.
 
 Render's free Postgres expires after 30 days. To keep the blog longer, point `DATABASE_URL` at a free Neon or Supabase database instead.

@@ -1,11 +1,16 @@
-# Render Blueprint: one API web service, one Postgres database and two static
-# sites from this monorepo. New → Blueprint in the Render dashboard, pick this
-# repo, then fill in the values marked sync: false when prompted.
+# Render Blueprint: the Postgres database and the two static sites. New →
+# Blueprint in the Render dashboard, pick this repo, then fill in the values
+# marked sync: false when prompted.
 #
-# The URLs only exist after the first deploy, so the order is:
-#   1. Deploy the Blueprint (fill VITE_API_URL with https://<api>.onrender.com/api
-#      using the API name you see in the form; CLIENT_ORIGINS can wait).
-#   2. Set CLIENT_ORIGINS on the API to the two static-site URLs and redeploy it.
+# The API is deliberately not in this file. It runs as a standalone Render Web
+# Service (odin-blog-api) created in the dashboard, so a Blueprint sync never
+# creates a second copy of it. Its settings, for recreating it:
+#   Root directory: api
+#   Build command:  npm ci --include=dev && npm run build
+#   Start command:  npm start
+#   Env vars:       NODE_ENV=production, DATABASE_URL (odin-blog-db's internal
+#                   URL), JWT_SECRET (generated), AUTHOR_USERNAME, AUTHOR_PASSWORD,
+#                   SEED_SAMPLE_POST=true, CLIENT_ORIGINS (both static-site URLs)
 databases:
   - name: odin-blog-db
     plan: free
@@ -13,36 +18,7 @@ databases:
     databaseName: blog_api
 
 services:
-  - type: web
-    name: odin-blog-api
-    runtime: node
-    rootDir: api
-    plan: free
-    region: oregon
-    healthCheckPath: /
-    # --include=dev: the build needs the Prisma CLI, which is a devDependency.
-    buildCommand: npm ci --include=dev && npm run build
-    startCommand: npm start
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: DATABASE_URL
-        fromDatabase:
-          name: odin-blog-db
-          property: connectionString
-      - key: JWT_SECRET
-        generateValue: true
-      - key: AUTHOR_USERNAME
-        value: author
-      # The author's login password. Prompted for, never committed.
-      - key: AUTHOR_PASSWORD
-        sync: false
-      - key: SEED_SAMPLE_POST
-        value: "true"
-      # e.g. https://odin-blog-client.onrender.com,https://odin-blog-admin.onrender.com
-      - key: CLIENT_ORIGINS
-        sync: false
-
+  # VITE_API_URL: https://odin-blog-api-olv3.onrender.com/api
   - type: web
     name: odin-blog-client
     runtime: static
